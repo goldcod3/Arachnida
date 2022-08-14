@@ -42,8 +42,6 @@ def checkPath(path):
     try:
         while exists(path) == False:
             mkdir(path)
-        #with open(path+'/'+'.fill','w') as fill:
-        #    fill.write('')
         return True
     except:
         return False

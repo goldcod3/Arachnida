@@ -16,6 +16,7 @@ class Scanner:
 
     # Constructor of Scanner
     def __init__(self, url, depth=5, path=getDefaultPath()):
+        url = checkUrl(url)
         self.parse_url = urlparse(url)
         self.origin = url
         self.url = self.parse_url.scheme+'://'+self.parse_url.netloc
@@ -45,6 +46,7 @@ class Scanner:
                 for ref in lvl.links:
                     self.getLinksUrl(ref, self.headers.getHead(), printer)
                 self.headers.updateHeaders()
+            sleep(3)
         else:
             self.getLinksUrlSilent(self.origin, self.headers.getHead())
             for lvl in self.lvls:
@@ -59,9 +61,9 @@ class Scanner:
         printer.messageOk('','[->][SCAN]: {}'.format(target))
         self.logs.debug('   [SCAN]: '+target)
         self.logs.debug('   [AGENT]: '+req.header['User-Agent'])
-        req.get_content()
+        req.getContent()
         if req.content != None:
-            links = req.get_links_hrefs()
+            links = req.getLinksHrefs()
             self.logs.debug('   [-] Total Hrefs scaned: '+str(len(links)))
             if len(links) > 0:
                 lnk_bar = tqdm(range(len(links)),'   [-] Href scan: ',)
@@ -70,7 +72,7 @@ class Scanner:
                     if href != None:
                         self.chargeHref(href)
                     #sleep(0.009)
-            imgs = req.get_links_img()
+            imgs = req.getLinksImg()
             self.logs.debug('   [-] Total Images scaned: '+str(len(links)))
             if len(imgs) > 0:
                 img_bar = tqdm(range(len(imgs)),'   [-] Img scan: ')
@@ -88,16 +90,16 @@ class Scanner:
         req = Request(target,head)
         self.logs.debug('   [SCAN]: '+target)
         self.logs.debug('   [AGENT]: '+req.header['User-Agent'])
-        req.get_content()
+        req.getContent()
         if req.content != None:
-            links = req.get_links_hrefs()
+            links = req.getLinksHrefs()
             self.logs.debug('   [-] Total Hrefs scaned: '+str(len(links)))
             if len(links) > 0:
                 for link in links:
                     href = self.checkHref(link)
                     if href != None:
                         self.chargeHref(href)
-            imgs = req.get_links_img()
+            imgs = req.getLinksImg()
             self.logs.debug('   [-] Total Images scaned: '+str(len(links)))
             if len(imgs) > 0:
                for img in imgs:
@@ -217,4 +219,4 @@ class Scanner:
             log.error('   Not found resources.')
         log.info('')
         log.info('')
-        log.info('')
+        sleep(3)

@@ -4,7 +4,7 @@ FROM debian:latest
 RUN apt-get update -y && apt-get upgrade -y
 RUN apt-get install sudo zip vim -y
 RUN apt-get install python3 python3-pip -y
-RUN pip install beautifulsoup4 requests lxml tqdm
+RUN pip install beautifulsoup4 requests lxml tqdm Pillow
 
 # User target configuration
 RUN useradd -m dev

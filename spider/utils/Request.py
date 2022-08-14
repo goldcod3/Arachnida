@@ -13,9 +13,9 @@ class Request:
         self.reason = ''
 
     # Function that obtains html code from url - Request
-    def get_content(self):
+    def getContent(self):
         try:
-            target = check_url(self.url)
+            target = checkUrl(self.url)
             req = requests.get(target, headers=self.header, timeout=1)
             self.status_code = req.status_code
             self.reason = req.reason
@@ -26,8 +26,19 @@ class Request:
         except Exception:
             print('[ERROR] Domain not found --> {}'.format(target))
 
+    def getResource(self):
+        try:
+            target = checkUrl(self.url)
+            req = requests.get(target, headers=self.header, timeout=1)
+            self.status_code = req.status_code
+            self.reason = req.reason
+            if req.status_code == 200:
+                self.content = req.content
+        except Exception:
+            print('[ERROR] Domain not found --> {}'.format(target))
+
     # Function that obtains links to pages to be scanned
-    def get_links_hrefs(self):
+    def getLinksHrefs(self):
         links = list()
         if self.content != None:
             elements = self.content.findAll('a')
@@ -37,7 +48,7 @@ class Request:
         return links
 
     # Function that obtains links to img to be downloaded
-    def get_links_img(self):
+    def getLinksImg(self):
         links = list()
         if self.content != None:
             elements = self.content.findAll('img')
@@ -48,7 +59,7 @@ class Request:
 
 
 # Function that checks the syntax 'http' of a url [origin]
-def check_url(origin):
+def checkUrl(origin):
     parser = urlparse(origin)
     if parser.scheme == '':
         url = 'http://'+parser.path
