@@ -34,4 +34,4 @@ def initLevels(depth, url):
             lvl.links.append(url)
             lvl.total_links +=1
         levels.append(lvl)
-    return levels  
+    return levels

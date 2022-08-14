@@ -75,3 +75,4 @@ def check_status_code(url, code, description):
         printer.messageError('STATUS CODE [{} - {}] - Client error detected.'.format(code,description))
     if code in range(500,599):
         printer.messageError('STATUS CODE [{} - {}] - Server error detected.'.format(code,description))
+

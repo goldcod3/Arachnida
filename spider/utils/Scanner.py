@@ -133,3 +133,4 @@ class Scanner:
             printer.messageInfo(str(self.total_img),'[TOTAL IMG\'S FOUND]: ')
         else:
             printer.messageError('Not found resources.')
+

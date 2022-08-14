@@ -59,5 +59,3 @@ class Printer:
         for i in initBar:
             sleep(0.02)
         print('\n\n')
-
-        
