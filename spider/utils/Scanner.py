@@ -7,51 +7,68 @@ from utils.Level import *
 from utils.Header import *
 from utils.Request import *
 from utils.Printer import *
+from utils.Logger import *
 
+# Default image extensions 
 default_exts = ('.png','.jpg','jpeg','gif','.bmp')
 
 class Scanner:
 
     # Constructor of Scanner
-    def __init__(self, url, depth=5):
+    def __init__(self, url, depth=5, path=getDefaultPath()):
         self.parse_url = urlparse(url)
         self.origin = url
         self.url = self.parse_url.scheme+'://'+self.parse_url.netloc
         self.depth = depth
         self.lvls = initLevels(depth, url)
-        self.headers = Header()
-        self.headers.updateHeaders()
         self.imgs = list()
         self.total_img = 0
+        self.headers = Header()
+        self.headers.updateHeaders()
+        self.path_scan = getNameDir(self.parse_url.netloc)
+        checkPath(path)
+        self.logs = Logger(('scan_'+self.parse_url.netloc),(path+'/'+self.path_scan))
+
 
     # Function that scans url initialized in Scanner object.
     def depthScan(self):
         printer = Printer()
         printer.printBanner('[$$$] Starting scanning')
-        self.getLinksUrl(self.origin, self.headers.getHead())
+        self.getLinksUrl(self.origin, self.headers.getHead(), printer)
         for lvl in self.lvls:
             for ref in lvl.links:
-                self.getLinksUrl(ref, self.headers.getHead())
+                self.getLinksUrl(ref, self.headers.getHead(), printer)
             self.headers.updateHeaders()
 
     # Function that loads all the links and images of a url [target]
-    def getLinksUrl(self, target, head):
+    def getLinksUrl(self, target, head, printer):
         req = Request(target,head)
+        printer.messageOk('','[->][SCAN]: {}'.format(target))
+        self.logs.debug('   [SCAN]: '+target)
+        self.logs.debug('   [AGENT]: '+req.header['User-Agent'])
         req.get_content()
-        links = req.get_links_hrefs()
-        lnk_bar = tqdm(range(len(links)),'   [-] Href scan: ',)
-        for l in lnk_bar:
-            href = self.checkHref(links[l])
-            if href != None:
-                self.chargeHref(href)
-            #sleep(0.009)
-        imgs = req.get_links_img()
-        img_bar = tqdm(range(len(imgs)),'   [-] Img scan: ')
-        for i in img_bar:
-            ref = self.checkImage(imgs[i])
-            if ref != None:
-                self.addImg(ref)
-            #sleep(0.009)
+        if req.content != None:
+            links = req.get_links_hrefs()
+            self.logs.debug('   [-] Total Hrefs scaned: '+str(len(links)))
+            if len(links) > 0:
+                lnk_bar = tqdm(range(len(links)),'   [-] Href scan: ',)
+                for l in lnk_bar:
+                    href = self.checkHref(links[l])
+                    if href != None:
+                        self.chargeHref(href)
+                    #sleep(0.009)
+            imgs = req.get_links_img()
+            self.logs.debug('   [-] Total Images scaned: '+str(len(links)))
+            if len(imgs) > 0:
+                img_bar = tqdm(range(len(imgs)),'   [-] Img scan: ')
+                for i in img_bar:
+                    ref = self.checkImage(imgs[i])
+                    if ref != None:
+                        self.addImg(ref)
+                    #sleep(0.009)
+        else:
+            printer.check_status_code(target, req.status_code, req.reason)
+            self.logs.error('   {} --> [{} - {}]'.format(target,req.status_code,req.reason))
 
     # Function that subdivides url [content] into levels 
     def chargeHref(self, content):

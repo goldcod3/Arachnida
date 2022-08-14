@@ -59,3 +59,19 @@ class Printer:
         for i in initBar:
             sleep(0.02)
         print('\n\n')
+
+    # Function that checks request status codes
+    def check_status_code(self, url, code, description):
+        printer = Printer()
+        printer.messageWarning('Status code 200 is required for -> {}'.format(url))
+        if code in range(100,199):
+            printer.messageError('STATUS CODE [{} - {}] - Informative server response.'.format(code,description))
+        if code in range(201,299):
+            printer.messageError('STATUS CODE [{} - {}] - Successfull server response.'.format(code,description))
+        if code in range(300,399):
+            printer.messageError('STATUS CODE [{} - {}] - Redirection detected on server.'.format(code,description))
+        if code in range(400,499):
+            printer.messageError('STATUS CODE [{} - {}] - Client error detected.'.format(code,description))
+        if code in range(500,599):
+            printer.messageError('STATUS CODE [{} - {}] - Server error detected.'.format(code,description))
+
