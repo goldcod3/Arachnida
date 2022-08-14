@@ -7,6 +7,7 @@ test4 = "https://goldcod3.github.io"
 
 res = "https://www.qoppa.com/wp-content/uploads/logo9.png"
 
-scan = Scanner(test1)
+scan = Scanner(test4)
 scan.depthScan()
 scan.printScan()
+scan.logsScanResult()

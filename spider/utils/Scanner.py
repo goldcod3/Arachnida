@@ -25,24 +25,37 @@ class Scanner:
         self.total_img = 0
         self.headers = Header()
         self.headers.updateHeaders()
+        self.path = path
         self.path_scan = getNameDir(self.parse_url.netloc)
         checkPath(path)
         self.logs = Logger(('scan_'+self.parse_url.netloc),(path+'/'+self.path_scan))
 
 
     # Function that scans url initialized in Scanner object.
-    def depthScan(self):
-        printer = Printer()
-        printer.printBanner('[$$$] Starting scanning')
-        self.getLinksUrl(self.origin, self.headers.getHead(), printer)
-        for lvl in self.lvls:
-            for ref in lvl.links:
-                self.getLinksUrl(ref, self.headers.getHead(), printer)
-            self.headers.updateHeaders()
+    def depthScan(self, silent=False):
+        self.logs.info('')
+        self.logs.info('[~] --- *[SCANNING]* --- [~]')
+        self.logs.info('')
+        self.logs.info('')
+        if silent == False:
+            printer = Printer()
+            printer.printBanner('[$$$] Starting scanning')
+            self.getLinksUrl(self.origin, self.headers.getHead(), printer)
+            for lvl in self.lvls:
+                for ref in lvl.links:
+                    self.getLinksUrl(ref, self.headers.getHead(), printer)
+                self.headers.updateHeaders()
+        else:
+            self.getLinksUrlSilent(self.origin, self.headers.getHead())
+            for lvl in self.lvls:
+                for ref in lvl.links:
+                    self.getLinksUrlSilent(ref, self.headers.getHead())
+                self.headers.updateHeaders()
 
     # Function that loads all the links and images of a url [target]
     def getLinksUrl(self, target, head, printer):
         req = Request(target,head)
+        self.logs.info('')
         printer.messageOk('','[->][SCAN]: {}'.format(target))
         self.logs.debug('   [SCAN]: '+target)
         self.logs.debug('   [AGENT]: '+req.header['User-Agent'])
@@ -68,6 +81,30 @@ class Scanner:
                     #sleep(0.009)
         else:
             printer.check_status_code(target, req.status_code, req.reason)
+            self.logs.error('   {} --> [{} - {}]'.format(target,req.status_code,req.reason))
+
+    # Function that loads all the links and images of a url [target]
+    def getLinksUrlSilent(self, target, head):
+        req = Request(target,head)
+        self.logs.debug('   [SCAN]: '+target)
+        self.logs.debug('   [AGENT]: '+req.header['User-Agent'])
+        req.get_content()
+        if req.content != None:
+            links = req.get_links_hrefs()
+            self.logs.debug('   [-] Total Hrefs scaned: '+str(len(links)))
+            if len(links) > 0:
+                for link in links:
+                    href = self.checkHref(link)
+                    if href != None:
+                        self.chargeHref(href)
+            imgs = req.get_links_img()
+            self.logs.debug('   [-] Total Images scaned: '+str(len(links)))
+            if len(imgs) > 0:
+               for img in imgs:
+                    ref = self.checkImage(img)
+                    if ref != None:
+                        self.addImg(ref)
+        else:
             self.logs.error('   {} --> [{} - {}]'.format(target,req.status_code,req.reason))
 
     # Function that subdivides url [content] into levels 
@@ -151,3 +188,33 @@ class Scanner:
         else:
             printer.messageError('Not found resources.')
 
+    def logsScanResult(self):
+        log = self.logs
+        log.name = 'scan_resume_'+self.parse_url.netloc
+        log.info('')
+        log.info('')
+        log.info('')
+        log.info('[*] --- *[RESUME]* --- [*]')
+        log.info('')
+        log.info('[/] --- *[LEVELS]* --- [/]')
+        log.info('')
+        for lvl in self.lvls:
+            log.debug('[>]    [LEVEL DEPTH]: {}'.format(str(lvl.getDepth())))
+            if lvl.getTotalLinks() > 0:
+                log.debug('       [TOTAL URL\'S SCANNED]: {}'.format(str(lvl.getTotalLinks())))
+            else:
+                log.error('       Not found links.')
+            log.info('')
+        log.info('')
+        log.info('[+] --- *[RESOURCES]* --- [+]')
+        log.info('')
+        if self.total_img > 0:
+            for img in self.imgs:
+                log.warning('[*]    {}'.format(img))
+            log.info('')
+            log.warning('   [TOTAL IMG\'S FOUND]: {}'.format(str(self.total_img)))
+        else:
+            log.error('   Not found resources.')
+        log.info('')
+        log.info('')
+        log.info('')
