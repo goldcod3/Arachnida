@@ -5,7 +5,7 @@ from io import BytesIO
 from utils.Request import *
 from utils.Header import *
 from utils.Printer import *
-from utils.Logger import getDefaultPath
+from utils.Logger import checkPath, getDefaultPath
 
 # Default image extensions 
 default_exts = ('.png','.jpg','jpeg','gif','.bmp')

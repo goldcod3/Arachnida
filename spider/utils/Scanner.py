@@ -15,8 +15,7 @@ default_exts = ('.png','.jpg','jpeg','gif','.bmp')
 class Scanner:
 
     # Constructor of Scanner
-    def __init__(self, url, depth=5, path=getDefaultPath()):
-        url = checkUrl(url)
+    def __init__(self, url, depth, path):
         self.parse_url = urlparse(url)
         self.origin = url
         self.url = self.parse_url.scheme+'://'+self.parse_url.netloc
