@@ -1,6 +1,6 @@
 import argparse
 
-# Flags configurations
+# Flags spider configurations
 def config_args():
     parse = argparse.ArgumentParser(
         description="""*** Arachnida - Spider ***

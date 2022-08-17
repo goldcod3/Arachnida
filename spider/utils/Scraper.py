@@ -41,7 +41,7 @@ class Scraper:
             for img in self.resources:
                 if img not in self.process:
                     self.logs.debug('   [REQUEST]: '+img)
-                    if self.getResource(img):
+                    if self.scrapResource(img):
                         self.process.append(img)
                         self.total_proc +=1
                         self.logs.debug('   [DOWNLOAD]: '+getNameImg(img))
@@ -50,8 +50,6 @@ class Scraper:
                             printer.messageOk(getNameImg(img),'[->]  {}   [DOWNLOAD]: '.format(self.total_proc))
                     else:
                         self.logs.error('   [-] Error downloading --> {}'.format(getNameImg(img)))
-                        if silent == False:
-                            printer.messageError('   [-] Error downloading --> {}'.format(getNameImg(img)))
                     if self.total_proc % 5 == 0:
                         self.headers.updateHeaders()
             self.logs.info('')
@@ -64,7 +62,8 @@ class Scraper:
             if silent == False:
                 printer.messageError('','   [NOT FOUND RESOURCES]')
 
-    def getResource(self, target):
+    def scrapResource(self, target):
+        printer = Printer()
         req = Request(target, self.headers.getHead())
         req.getResource()
         if req.content != None:
@@ -77,6 +76,7 @@ class Scraper:
             except:
                 return False
         else:
+            printer.check_status_code(target, req.status_code, req.reason)
             return False
 
 def checkUrlImage(url):

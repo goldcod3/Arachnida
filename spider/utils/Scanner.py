@@ -33,80 +33,51 @@ class Scanner:
 
     # Function that scans url initialized in Scanner object.
     def depthScan(self, silent=False):
+        printer = Printer()
+        if silent == False:
+            printer.printBanner('[$$$] Starting scanning')
         self.logs.info('')
         self.logs.info('[~] --- *[SCANNING]* --- [~]')
         self.logs.info('')
         self.logs.info('')
-        if silent == False:
-            printer = Printer()
-            printer.printBanner('[$$$] Starting scanning')
-            self.getLinksUrl(self.origin, self.headers.getHead(), printer)
-            for lvl in self.lvls:
-                for ref in lvl.links:
-                    self.getLinksUrl(ref, self.headers.getHead(), printer)
-                self.headers.updateHeaders()
-            sleep(3)
-        else:
-            self.getLinksUrlSilent(self.origin, self.headers.getHead())
-            for lvl in self.lvls:
-                for ref in lvl.links:
-                    self.getLinksUrlSilent(ref, self.headers.getHead())
-                self.headers.updateHeaders()
+        self.getLinksUrl(self.origin, self.headers.getHead(), printer, silent)
+        for lvl in self.lvls:
+            for ref in lvl.links:
+                self.getLinksUrl(ref, self.headers.getHead(), printer, silent)
+            self.headers.updateHeaders()
+        sleep(3)
 
     # Function that loads all the links and images of a url [target]
-    def getLinksUrl(self, target, head, printer):
+    def getLinksUrl(self, target, head, printer, silent):
         req = Request(target,head)
         self.logs.info('')
-        printer.messageOk('','[->][SCAN]: {}'.format(target))
         self.logs.debug('   [SCAN]: '+target)
         self.logs.debug('   [AGENT]: '+req.header['User-Agent'])
         req.getContent()
         if req.content != None:
             links = req.getLinksHrefs()
-            self.logs.debug('   [-] Total Hrefs scaned: '+str(len(links)))
-            if len(links) > 0:
-                lnk_bar = tqdm(range(len(links)),'   [-] Href scan: ',)
-                for l in lnk_bar:
-                    href = self.checkHref(links[l])
-                    if href != None:
-                        self.chargeHref(href)
-                    #sleep(0.009)
-            imgs = req.getLinksImg()
-            self.logs.debug('   [-] Total Images scaned: '+str(len(links)))
-            if len(imgs) > 0:
-                img_bar = tqdm(range(len(imgs)),'   [-] Img scan: ')
-                for i in img_bar:
-                    ref = self.checkImage(imgs[i])
-                    if ref != None:
-                        self.addImg(ref)
-                    #sleep(0.009)
-        else:
-            printer.check_status_code(target, req.status_code, req.reason)
-            self.logs.error('   {} --> [{} - {}]'.format(target,req.status_code,req.reason))
-
-    # Function that loads all the links and images of a url [target]
-    def getLinksUrlSilent(self, target, head):
-        req = Request(target,head)
-        self.logs.debug('   [SCAN]: '+target)
-        self.logs.debug('   [AGENT]: '+req.header['User-Agent'])
-        req.getContent()
-        if req.content != None:
-            links = req.getLinksHrefs()
-            self.logs.debug('   [-] Total Hrefs scaned: '+str(len(links)))
             if len(links) > 0:
                 for link in links:
                     href = self.checkHref(link)
                     if href != None:
                         self.chargeHref(href)
             imgs = req.getLinksImg()
-            self.logs.debug('   [-] Total Images scaned: '+str(len(links)))
             if len(imgs) > 0:
-               for img in imgs:
-                    ref = self.checkImage(img)
+                for img in imgs:
+                    ref = self.checkImage(img, target)
                     if ref != None:
                         self.addImg(ref)
+            self.logs.debug('   [-] Total Hrefs scaned: '+str(len(links)))
+            self.logs.debug('   [-] Total Images scaned: '+str(len(imgs)))
+            if silent == False:
+                printer.messageOk('','[->][SCAN]: {}'.format(target))
+                printer.messageInfo('Total Hrefs scaned: '+str(len(links)), '        [->] ')
+                printer.messageInfo('Total Images scaned: '+str(len(imgs)), '        [->] ')
+                sleep(0.1)         
         else:
-            self.logs.error('   {} --> [{} - {}]'.format(target,req.status_code,req.reason))
+            self.logs.error('       {} --> [{} - {}]'.format(target,req.status_code,req.reason))
+            if silent == False:
+                printer.check_status_code(target, req.status_code, req.reason)
 
     # Function that subdivides url [content] into levels 
     def chargeHref(self, content):
@@ -135,10 +106,14 @@ class Scanner:
     # Link checking function
     def checkHref(self, href):
         if href != None:
-            if href.startswith(self.url):
-                return href
-            elif href.startswith("/"):
-                return self.url+href
+            name , ext = splitext(href)
+            if ext == "":
+                if href.startswith(self.url):
+                    return href
+                elif href.startswith("/"):
+                    return self.url+href
+                else:
+                    return None
             else:
                 return None
 
@@ -149,7 +124,7 @@ class Scanner:
             self.total_img +=1
 
     # Image checking function
-    def checkImage(self, img):
+    def checkImage(self, img, target_url):
         tmp = img
         if img != None:
             if tmp.startswith(self.url):
@@ -160,7 +135,10 @@ class Scanner:
                 if tmp.startswith('/'):
                     tmp = self.url+img
                 if tmp.startswith('http') == False:
-                    tmp = self.url+'/'+img
+                    if target_url.endswith('/'):
+                        tmp = target_url+img
+                    else:
+                        tmp = target_url+'/'+img
                 res, ext = splitext(tmp)
                 if ext in default_exts:
                     return tmp       

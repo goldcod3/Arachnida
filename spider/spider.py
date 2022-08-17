@@ -36,11 +36,12 @@ def run_spyder():
     if args.recursive == None and args.image != None:
         url_res = checkUrl(args.image)
         if checkUrlImage(url_res):
-            scrp = Scraper()
-            checkPath(scrp.path)
-            result = scrp.getResource(url_res)
             if args.silent == False:
                 printer.printBanner('[*] Scraping resource')
+            scrp = Scraper()
+            checkPath(scrp.path)
+            result = scrp.scrapResource(url_res)
+            if args.silent == False:
                 if result:
                     printer.messageOk(' Resource \'{}\' downloaded in default data directory.'.format(url_res))
                 else:

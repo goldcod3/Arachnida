@@ -1,6 +1,9 @@
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
+from urllib3.exceptions import InsecureRequestWarning
+
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 class Request:
 
@@ -16,7 +19,7 @@ class Request:
     def getContent(self):
         try:
             target = checkUrl(self.url)
-            req = requests.get(target, headers=self.header, timeout=1)
+            req = requests.get(target, headers=self.header, timeout=2, verify=False,)
             self.status_code = req.status_code
             self.reason = req.reason
             if req.status_code == 200:
@@ -29,7 +32,7 @@ class Request:
     def getResource(self):
         try:
             target = checkUrl(self.url)
-            req = requests.get(target, headers=self.header, timeout=1)
+            req = requests.get(target, headers=self.header, timeout=2, verify=False)
             self.status_code = req.status_code
             self.reason = req.reason
             if req.status_code == 200:
