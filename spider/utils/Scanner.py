@@ -8,7 +8,7 @@ from utils.Request import *
 from utils.Printer import *
 from utils.Logger import *
 
-# Default image extensions 
+# Default extensions files
 default_images = ('.png','.jpg','.jpeg','.gif','.bmp')
 default_files = ('.docx','.pdf')
 
@@ -94,7 +94,7 @@ class Scanner:
                 if ext in default_files:
                     self.checkFile(href)
 
-
+    # File checking function
     def checkFile(self, file):
         if file != None:
             if file.startswith(self.url):
@@ -132,11 +132,12 @@ class Scanner:
                     level.total_links += 1
                 break
 
+    # Function that adds file to list
     def addFile(self, file):
         if file not in self.resources.files:
             self.resources.addResFile(file)
 
-    # Function that adds img to list
+    # Function that adds image to list
     def addImg(self, img):
         if img not in self.resources.images:
             self.resources.addResImage(img)
@@ -169,8 +170,6 @@ class Scanner:
         else:
             self.printer.messageError('Not found resources.')
         self.printer.messageInfo('','', 3)
-        
-
 
 # Function that initializes the levels as a function of depth
 def initScanLevels(depth, url):

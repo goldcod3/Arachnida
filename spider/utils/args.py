@@ -4,16 +4,16 @@ import argparse
 def config_args():
     parse = argparse.ArgumentParser(
         description="""*** Arachnida - Spider ***
-        Web Image Scraper - Download all images from a target website."""
+        Web Scraper - Download resources from a target website."""
     )
     # Recursive download resources
     parse.add_argument("-r","--recursive", default=None, help="[-r URL] Recursive mode.")
     # Level of depth scanning
     parse.add_argument("-l","--level", default=None, help="[-r URL -l Nº] Recursive mode + level of scanning.")
     # Path of download resources
-    parse.add_argument("-p","--path", default=None, help="[-r URL -p /absolute-path] Dyrectory for download images.")
-    # Silent mode
-    parse.add_argument("-S","--silent", default=False, action="store_true", help="Silent option.")
+    parse.add_argument("-p","--path", default=None, help="[-r URL -p /absolute-path] Recursive mode + directory for download images.")
     # Download resource from url
-    parse.add_argument("-i","--image", default=None, help="[-i URL-RESOURCE] Download resource image to default path.")
+    parse.add_argument("-f","--file", default=None, help="[-f URL-RESOURCE] Download resource image to default data path.")
+    # Silent mode
+    parse.add_argument("-S","--silent", default=False, action="store_true", help="Silent mode option.")
     return parse.parse_args()

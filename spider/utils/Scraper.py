@@ -8,12 +8,13 @@ from utils.Header import *
 from utils.Printer import *
 from utils.Logger import *
 
-# Default extensions 
+# Default extensions files
 default_images = ('.png','.jpg','.jpeg','.gif','.bmp')
 default_files = ('.docx','.pdf')
 
 class Scraper:
 
+    # Constructor of Scraper
     def __init__(self, url, path):
         self.url = url
         self.path = path
@@ -23,6 +24,7 @@ class Scraper:
         self.headers.chargeHeaders(5)
         self.printer = Printer()        
 
+    # Function to download files previously scanned with a scanner object
     def scrapResources(self, resources, silent=False):
         self.resources = resources
         self.printer.setSilent(silent=silent)
@@ -47,6 +49,7 @@ class Scraper:
         else:
             self.printer.messageError(' NOT FOUND RESOURCES')
 
+    # Function that download a resource from the url previously loaded in the scraper object
     def scrapResourceFromUrl(self, silent=False):
         self.printer.setSilent(silent=silent)
         self.printer.printBanner('[*] Scraping resource')
@@ -66,7 +69,7 @@ class Scraper:
         else:
             self.printer.messageError(' Resource \'{}\' not found.'.format(self.url))
 
-
+    # Function that download a image
     def scrapImage(self, url_image, path):
         name = getNameResource(url_image)
         if exists(path+'/'+name) == False:
@@ -84,7 +87,7 @@ class Scraper:
         else:
             self.printer.messageWarning('The file exist in path --> {}'.format(path), '   [*] ')
 
-
+    # Function that download a file
     def scrapFile(self, url_file, path):
         name = getNameResource(url_file)
         if exists(path+'/'+name) == False:
@@ -102,12 +105,14 @@ class Scraper:
         else:
             self.printer.messageWarning('The file exist in path --> {}'.format(path), '   [*] ')
 
+    # Function that returns the path to the directory where the resources will be saved
     def getScrapPath(self):
         datapath = self.path+'/'+self.url
         while exists(datapath) == False:
                 mkdir(datapath)
         return datapath
 
+# Function that returns the name of the resource to download
 def getNameResource(url):
     spl_url = url.replace('/',' ').split()
     return spl_url[-2]+'_'+spl_url[-1]

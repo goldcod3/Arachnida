@@ -4,12 +4,12 @@ from utils.args import config_args
 from utils.Scanner import *
 from utils.Scraper import *
 
-# Main
+# Main function
 def run_spyder():
     args = config_args()
     printer = Printer(silent=args.silent)
     # Recursive Scraper Mode
-    if args.recursive != None and args.image == None:
+    if args.recursive != None and args.file == None:
         # Url validation
         url_scan = checkHttpUrl(args.recursive)
         # Level validation
@@ -34,12 +34,13 @@ def run_spyder():
         # Starting scraper
         scrap = Scraper(scan.parse_url.netloc, path_scan)
         scrap.scrapResources(scan.resources, silent=args.silent)
-        
-    # Resource Scraper Mode
-    if args.recursive == None and args.image != None:
+
+    # File Scraper Mode
+    if args.recursive == None and args.file != None:
         path_scan = getDefaultDataPath()
         checkDataPath(path_scan)
-        url_res = checkHttpUrl(args.image)
+        url_res = checkHttpUrl(args.file)
+        # Starting scraper
         scrp = Scraper(url_res, path_scan)
         scrp.scrapResourceFromUrl(silent=args.silent)
 
@@ -52,6 +53,7 @@ def checkHttpUrl(origin):
     else:
         return origin
 
+# Function that checks flag level [-l]
 def checkNumLevel(level):
     try:
         if int(level) > 0:
@@ -60,6 +62,7 @@ def checkNumLevel(level):
     except:
         return False
 
+# Function that checks if the path exists and if it does not exist it creates it
 def checkDataPath(path):
     try:
         while exists(path) == False:
@@ -68,6 +71,7 @@ def checkDataPath(path):
     except:
         return False
 
+# Function that returns the default path
 def getDefaultDataPath():
     current_path = abspath(getcwd())
     spl_current = current_path.replace('/',' ').split()
@@ -76,5 +80,6 @@ def getDefaultDataPath():
         default = default + '/' +spl_current[i]
     return default + '/data'
 
+# Run main function
 if __name__=='__main__':
     run_spyder()

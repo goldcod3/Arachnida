@@ -1,5 +1,3 @@
-from os.path import abspath, exists
-from os import getcwd, mkdir
 
 class Resources:
 

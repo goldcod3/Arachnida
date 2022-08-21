@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 from urllib3.exceptions import InsecureRequestWarning
 
+# Disable insecure request warnings
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 class Request:
@@ -29,6 +30,7 @@ class Request:
         except Exception:
             printer.messageError('[ERROR] Domain not found --> {}'.format(target))
 
+    # Function that obtains the content of image to download
     def getImage(self, printer):
         try:
             target = checkUrl(self.url)
@@ -40,6 +42,7 @@ class Request:
         except Exception:
             printer.check_status_code(target, req.status_code, req.reason)
 
+    # Function that obtains the content of file to download
     def getFile(self, printer):
         try:
             target = checkUrl(self.url)
@@ -70,7 +73,6 @@ class Request:
                 src = img.get('src')
                 links.append(src)
         return links
-
 
 # Function that checks the syntax 'http' of a url [origin]
 def checkUrl(origin):

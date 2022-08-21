@@ -35,9 +35,11 @@ class Printer:
         self.silent = silent
         self.log = logger
 
+    # Set silent argument of Printer
     def setSilent(self, silent):
         self.silent = silent
 
+    # Set logger argument of Printer
     def setLogger(self, logger):
         self.log = logger
 
@@ -104,4 +106,3 @@ class Printer:
             self.messageError('STATUS CODE [{} - {}] - Client error detected. --> {}'.format(code,description,url),  '[->][ERROR]: ')
         if code in range(500,599):
             self.messageError('STATUS CODE [{} - {}] - Server error detected. --> {}'.format(code,description,url),  '[->][ERROR]: ')
-
