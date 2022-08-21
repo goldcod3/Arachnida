@@ -1,55 +1,61 @@
-import logging
 from datetime import datetime
 from time import time
 from os.path import abspath, exists
 from os import getcwd, mkdir
 
-
 class Logger:
 
-    def __init__(self, name, path=None):
-        if path == None:
-            path = getDefaultPath()
-        self.path = path
-        if checkPath(path):
-            name = path+'/'+name
-        self.name = name
-        logging.basicConfig(filename=self.name, level='DEBUG')
+    def __init__(self, name, type):
+        self.path = getLogsPath()
+        timelog = getDateLog()
+        self.namefile = type+'_'+name+'_'+timelog
+        self.logfile = self.path+'/'+self.namefile
+        self.createLogFile()
+
+    def createLogFile(self):
+        if exists(self.logfile) == False:
+            with open(self.logfile,'w') as logFile:
+                logFile.write('')
+
+    def messageLog(self, msg=''):
+        if exists(self.logfile):
+            with open(self.logfile,'a') as logFile:
+                logFile.write(msg+'\n')
+
+    def title(self, title):
+        self.messageLog('\n\n'+title+'\n\n')
+
+    def text(self, text):
+        self.messageLog(text)
 
     def info(self, msg):
-        logging.basicConfig(filename=self.name, level='DEBUG')
-        logging.info(msg)
+        self.messageLog('[INFO]: '+msg)
 
     def debug(self, msg):
-        logging.basicConfig(filename=self.name, level='DEBUG')
-        logging.debug(msg)
+        self.messageLog('[DEBUG]: '+msg)
+
+    def scan(self, msg):
+        self.messageLog('[SCAN]: '+msg)
 
     def warning(self, msg):
-        logging.basicConfig(filename=self.name, level='DEBUG')
-        logging.warning(msg)
+        self.messageLog('[WARNING]: '+msg)
 
     def error(self, msg):
-        logging.basicConfig(filename=self.name, level='DEBUG')
-        logging.error(msg)
+        self.messageLog('[ERROR]: '+msg)
 
-def getNameDir(url):
-        format_date = '%Y-%m-%d-%H-%M-%S'
+
+def getDateLog():
+        format_date = '%Y%m%d-%H%M%S'
         time_ = datetime.utcfromtimestamp(time())
-        time_str = datetime.strftime(time_, format_date)
-        return time_str+'_'+url
+        return datetime.strftime(time_, format_date)
 
-def checkPath(path):
-    try:
-        while exists(path) == False:
-            mkdir(path)
-        return True
-    except:
-        return False
-
-def getDefaultPath():
+def getLogsPath():
     current_path = abspath(getcwd())
     spl_current = current_path.replace('/',' ').split()
     default = ''
     for i in range(0,(len(spl_current)-1)):
         default = default + '/' +spl_current[i]
-    return default + '/data'
+    logpath = default + '/logs'
+    while exists(logpath) == False:
+            mkdir(logpath)
+    return logpath

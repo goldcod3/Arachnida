@@ -31,46 +31,77 @@ class Printer:
     AUTHOR = 'github.com/goldcod3'
 
     # Constructor of Printer
-    def __init__(self):
-        pass
+    def __init__(self, silent=False, logger=None):
+        self.silent = silent
+        self.log = logger
+
+    def setSilent(self, silent):
+        self.silent = silent
+
+    def setLogger(self, logger):
+        self.log = logger
 
     # Info message function
-    def messageInfo(self, msg, title='[INFO]: '):
-        print(Printer.BLUE + title + Printer.ENDC + msg)
+    def messageInfo(self, msg, title='[INFO]: ', time=0):
+        if self.silent == False:
+            print(Printer.BLUE + title + Printer.ENDC + msg)
+        if self.log != None:
+            self.log.info(msg)
+        sleep(time)
 
     # Success message function
-    def messageOk(self, msg, title='[OK]: '):
-        print(Printer.GREEN_L + title + Printer.ENDC + msg)
+    def messageOk(self, msg, title='[OK]: ', time=0):
+        if self.silent == False:
+            print(Printer.GREEN_L + title + Printer.ENDC + msg)
+        if self.log != None:
+            self.log.info(msg)
+        sleep(time)
 
+    # Success message function
+    def messageScan(self, msg, title='[SCAN]: ', time=0):
+        if self.silent == False:
+            print(Printer.GREEN_L + title + Printer.ENDC + msg)
+        if self.log != None:
+            self.log.info(title+msg)
+        sleep(time)
+        
     # Warning message function
-    def messageWarning(self, msg, title='[WARNING]: '):
-        print(Printer.YELLOW + title + Printer.ENDC + msg)
-
+    def messageWarning(self, msg, title='[WARNING]: ', time=0):
+        if self.silent == False:
+            print(Printer.YELLOW + title + Printer.ENDC + msg)
+        if self.log != None:
+            self.log.warning(msg)
+        sleep(time)
+        
     # Error message function
-    def messageError(self, msg, title='[ERROR]: '):
-        print(Printer.RED + title + Printer.ENDC + msg)
-
+    def messageError(self, msg, title='[ERROR]: ', time=0):
+        if self.silent == False:
+            print(Printer.RED + title + Printer.ENDC + msg)
+        if self.log != None:
+            self.log.error(msg)
+        sleep(time)
+        
     # Banner message function
     def printBanner(self, msg):
-        system('clear')
-        print(Printer.GREEN_D + Printer.BANNER + Printer.YELLOW + Printer.AUTHOR + Printer.ENDC)
-        print('\n\n')
-        initBar = tqdm(range(100),msg)
-        for i in initBar:
-            sleep(0.02)
-        print('\n\n')
+        if self.silent == False:
+            system('clear')
+            print(Printer.GREEN_D + Printer.BANNER + Printer.YELLOW + Printer.AUTHOR + Printer.ENDC)
+            print('\n\n')
+            initBar = tqdm(range(100),msg)
+            for i in initBar:
+                sleep(0.02)
+            print('\n\n')
 
     # Function that checks request status codes
     def check_status_code(self, url, code, description):
-        printer = Printer()
         if code in range(100,199):
-            printer.messageError('STATUS CODE [{} - {}] - Informative server response. --> {}'.format(code,description,url), '[->][ERROR]: ')
+            self.messageError('STATUS CODE [{} - {}] - Informative server response. --> {}'.format(code,description,url), '[->][ERROR]: ')
         if code in range(201,299):
-            printer.messageError('STATUS CODE [{} - {}] - Successfull server response. --> {}'.format(code,description,url), '[->][ERROR]: ')
+            self.messageError('STATUS CODE [{} - {}] - Successfull server response. --> {}'.format(code,description,url), '[->][ERROR]: ')
         if code in range(300,399):
-            printer.messageError('STATUS CODE [{} - {}] - Redirection detected on server. --> {}'.format(code,description,url),  '[->][ERROR]: ')
+            self.messageError('STATUS CODE [{} - {}] - Redirection detected on server. --> {}'.format(code,description,url),  '[->][ERROR]: ')
         if code in range(400,499):
-            printer.messageError('STATUS CODE [{} - {}] - Client error detected. --> {}'.format(code,description,url),  '[->][ERROR]: ')
+            self.messageError('STATUS CODE [{} - {}] - Client error detected. --> {}'.format(code,description,url),  '[->][ERROR]: ')
         if code in range(500,599):
-            printer.messageError('STATUS CODE [{} - {}] - Server error detected. --> {}'.format(code,description,url),  '[->][ERROR]: ')
+            self.messageError('STATUS CODE [{} - {}] - Server error detected. --> {}'.format(code,description,url),  '[->][ERROR]: ')
 

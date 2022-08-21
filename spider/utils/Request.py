@@ -16,7 +16,7 @@ class Request:
         self.reason = ''
 
     # Function that obtains html code from url - Request
-    def getContent(self):
+    def getContent(self, printer):
         try:
             target = checkUrl(self.url)
             req = requests.get(target, headers=self.header, timeout=2, verify=False,)
@@ -27,18 +27,29 @@ class Request:
                 soup = BeautifulSoup(html,'lxml')
                 self.content = soup
         except Exception:
-            print('[ERROR] Domain not found --> {}'.format(target))
+            printer.messageError('[ERROR] Domain not found --> {}'.format(target))
 
-    def getResource(self):
+    def getImage(self, printer):
         try:
             target = checkUrl(self.url)
-            req = requests.get(target, headers=self.header, timeout=2, verify=False)
+            req = requests.get(target, headers=self.header, verify=False)
             self.status_code = req.status_code
             self.reason = req.reason
             if req.status_code == 200:
                 self.content = req.content
         except Exception:
-            print('[ERROR] Domain not found --> {}'.format(target))
+            printer.check_status_code(target, req.status_code, req.reason)
+
+    def getFile(self, printer):
+        try:
+            target = checkUrl(self.url)
+            req = requests.get(target, headers=self.header, verify=False, stream=True)
+            self.status_code = req.status_code
+            self.reason = req.reason
+            if req.status_code == 200:
+                self.content = req
+        except Exception:
+            printer.check_status_code(target, req.status_code, req.reason)
 
     # Function that obtains links to pages to be scanned
     def getLinksHrefs(self):

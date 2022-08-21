@@ -1,92 +1,113 @@
-from posixpath import splitext
+from os.path import splitext
 from PIL import Image
 from io import BytesIO
 
+from utils.Resources import *
 from utils.Request import *
 from utils.Header import *
 from utils.Printer import *
-from utils.Logger import checkPath, getDefaultPath
+from utils.Logger import *
 
-# Default image extensions 
-default_exts = ('.png','.jpg','jpeg','gif','.bmp')
+# Default extensions 
+default_images = ('.png','.jpg','.jpeg','.gif','.bmp')
+default_files = ('.docx','.pdf')
 
 class Scraper:
 
-    def __init__(self):
-        self.resources = list()
-        self.total_imgs = 0
-        self.path = getDefaultPath()
-        self.process = list()
-        self.total_proc = 0
-        self.logs = None
+    def __init__(self, url, path):
+        self.url = url
+        self.path = path
+        self.resources = Resources()
+        self.process = 0
         self.headers = Header()
-        self.headers.updateHeaders()
+        self.headers.chargeHeaders(5)
+        self.printer = Printer()        
 
-    def initScraper(self, scanner):
-        self.resources = scanner.imgs
-        self.total_imgs = scanner.total_img
-        self.path = scanner.logs.path
-        self.logs = scanner.logs
-
-    def scrapImages(self, silent=False):
-        self.logs.info('')
-        self.logs.info('[$] --- *[SCRAPING]* --- [$]')
-        self.logs.info('')
-        self.logs.info('')
-        printer = Printer()
-        if silent == False:
-            printer.printBanner('[***] Starting scraper')
-            print()
-        if self.total_imgs > 0:
-            for img in self.resources:
-                if img not in self.process:
-                    self.logs.debug('   [REQUEST]: '+img)
-                    if self.scrapResource(img):
-                        self.process.append(img)
-                        self.total_proc +=1
-                        self.logs.debug('   [DOWNLOAD]: '+getNameImg(img))
-                        self.logs.info('')
-                        if silent == False:
-                            printer.messageOk(getNameImg(img),'[->]  {}   [DOWNLOAD]: '.format(self.total_proc))
-                    else:
-                        self.logs.error('   [-] Error downloading --> {}'.format(getNameImg(img)))
-                    if self.total_proc % 5 == 0:
-                        self.headers.updateHeaders()
-            self.logs.info('')
-            self.logs.warning('     [TOTAL RESOURCES DOWNLOADED]: {}'.format(self.total_proc))
-            if silent == False:
-                print()
-                printer.messageWarning('','     [TOTAL RESOURCES DOWNLOADED]: {}'.format(self.total_proc))
+    def scrapResources(self, resources, silent=False):
+        self.resources = resources
+        self.printer.setSilent(silent=silent)
+        self.printer.printBanner('[***] Starting scraper')
+        if self.resources.count_images > 0 or self.resources.count_files > 0:
+            logger = Logger(self.url,'scrap')
+            self.printer.setLogger(logger)
+            self.printer.log.title('[$] --- *[SCRAPING]* --- [$]')
+            datapath = self.getScrapPath()
+            if self.resources.count_images > 0:
+                self.headers.updateHeaders(50)
+                self.printer.messageInfo('[IMAGES]: ', '[>]')
+                for img in self.resources.images:
+                    self.scrapImage(img, datapath)
+            if self.resources.count_files > 0:
+                self.headers.updateHeaders(50)
+                self.printer.messageInfo('[FILES]: ', '[>]')
+                for file in self.resources.files:
+                    self.scrapFile(file, datapath)
+            total_resources = self.resources.count_images + self.resources.count_files
+            self.printer.messageInfo('Total --> {}/{}'.format(self.process, total_resources), '\n[DOWNLOADED] ')
         else:
-            self.logs.error('   [NOT FOUND RESOURCES]')
-            if silent == False:
-                printer.messageError('','   [NOT FOUND RESOURCES]')
+            self.printer.messageError(' NOT FOUND RESOURCES')
 
-    def scrapResource(self, target):
-        printer = Printer()
-        req = Request(target, self.headers.getHead())
-        req.getResource()
-        if req.content != None:
-            name = getNameImg(target)
-            try:
-                data = BytesIO(req.content)
-                img = Image.open(data)
-                img.save(self.path+'/'+name)
-                return True
-            except:
-                return False
+    def scrapResourceFromUrl(self, silent=False):
+        self.printer.setSilent(silent=silent)
+        self.printer.printBanner('[*] Scraping resource')
+        name, ext = splitext(self.url)
+        status = False
+        if ext != '':
+            if ext in default_images:
+                self.scrapImage(self.url, self.path)
+                status = True
+            if ext in default_files:
+                self.scrapFile(self.url, self.path)
+                status = True
+            if status == False:
+                self.printer.messageError(' Resource \'{}\' can\'t be downloaded.'.format(self.url))
+            else:
+                self.printer.messageOk(' Resource \'{}\' downloaded in default data directory.'.format(self.url))
         else:
-            printer.check_status_code(target, req.status_code, req.reason)
-            return False
+            self.printer.messageError(' Resource \'{}\' not found.'.format(self.url))
 
-def checkUrlImage(url):
-    name = getNameImg(url)
-    name_img, ext = splitext(name)
-    if ext in default_exts:
-        return True
-    else:
-        return False
 
-def getNameImg(url):
+    def scrapImage(self, url_image, path):
+        name = getNameResource(url_image)
+        if exists(path+'/'+name) == False:
+            req = Request(url_image, self.headers.getHead())
+            req.getImage(self.printer)
+            if req.content != None:
+                try:
+                    data = BytesIO(req.content)
+                    img = Image.open(data)
+                    img.save(path+'/'+name)
+                    self.process+=1
+                    self.printer.messageOk('{}   [DOWNLOAD]: {}'.format(self.process, name), '   [>] ')
+                except:
+                    self.printer.messageError('Error downloading --> {}'.format(url_image), '   [X] ')
+        else:
+            self.printer.messageWarning('The file exist in path --> {}'.format(path), '   [*] ')
+
+
+    def scrapFile(self, url_file, path):
+        name = getNameResource(url_file)
+        if exists(path+'/'+name) == False:
+            req = Request(url_file, self.headers.getHead())
+            req.getFile(self.printer)
+            if req.content != None:
+                try:
+                    with open(path+'/'+name, 'wb') as fd:
+                        for chunk in req.content.iter_content(chunk_size=128):
+                            fd.write(chunk)
+                    self.process+=1
+                    self.printer.messageOk('{}   [DOWNLOAD]: {}'.format(self.process, name), '   [>] ')
+                except:
+                    self.printer.messageError('Error downloading --> {}'.format(url_file), '   [X] ')
+        else:
+            self.printer.messageWarning('The file exist in path --> {}'.format(path), '   [*] ')
+
+    def getScrapPath(self):
+        datapath = self.path+'/'+self.url
+        while exists(datapath) == False:
+                mkdir(datapath)
+        return datapath
+
+def getNameResource(url):
     spl_url = url.replace('/',' ').split()
-    return spl_url[-1]
+    return spl_url[-2]+'_'+spl_url[-1]

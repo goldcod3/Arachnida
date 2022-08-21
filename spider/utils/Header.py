@@ -12,6 +12,14 @@ class Header:
         self.agents = list()
         self.headers = list()
 
+    # Function that obtains a random User-Agents.
+    def getAgent(self):
+        return choice(self.agents)
+
+    # Function that obtains a random Header
+    def getHead(self):
+        return choice(self.headers)
+
     # Function that loads the specified amount [len] of random User-Agents
     def chargeUserAgents(self, len):
         try:
@@ -20,15 +28,10 @@ class Header:
                 with open(file,"r") as dictionary:
                     agents = dictionary.read().splitlines()
                 self.agents.append(choice(agents))
-        except Exception as e:
+        except Exception:
             printer = Printer()
-            print (e)
             printer.messageError('Dictionary user agent {} not found.'.format(file))
             self.agents = None
-    
-    # Function that obtains a random User-Agents.
-    def getAgent(self):
-        return choice(self.agents)
 
     # Function that loads a number [count] of headers into Header object.
     def chargeHeaders(self, count=10):
@@ -38,16 +41,12 @@ class Header:
                     "Accept-Encoding":"gzip,deflate",
                     "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"}
             self.headers.append(head)
-    
-    # Function that obtains a random Header
-    def getHead(self):
-        return choice(self.headers)
 
     # Function that updates the headers of the Header object.
-    def updateHeaders(self):
+    def updateHeaders(self, count=10):
         self.agents.clear()
         self.headers.clear()
-        self.chargeHeaders()
+        self.chargeHeaders(count)
 
     # Function that prints the headers of the Header object
     def printHeaders(self):
