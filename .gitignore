@@ -1,2 +1,4 @@
 spider/__pycache__/*
 spider/utils/__pycache__/*
+scorpion/utils/__pycache__/*
+scorpion/tests/*
