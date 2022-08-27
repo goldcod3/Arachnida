@@ -2,8 +2,8 @@
 I_TESTER = img_arach
 TESTER = arachnida
 
-V_CODE = $(PWD)/src:/home/dev/src
-#V_TEST = $(PWD)/out:/home/dev/out -- -v $(V_TEST)
+V_SPIDER = $(PWD)/spider:/home/dev/spider
+V_SCORPION = $(PWD)/scorpion:/home/dev/scorpion
 
 all: dock
 # Ejecuta contenedor creado
@@ -12,7 +12,7 @@ exec:
 
 # Genera nuevo contenedor docker
 dock: image
-	@docker rm -fv $(TESTER) && docker run --name $(TESTER) -v $(V_CODE) -id $(I_TESTER)
+	@docker rm -fv $(TESTER) && docker run --name $(TESTER) -v $(V_SPIDER) -v $(V_SCORPION) -id $(I_TESTER)
 
 # Genera imagen docker
 image:

@@ -1,0 +1,8 @@
+beautifulsoup4
+requests
+lxml
+tqdm
+Pillow
+exifread
+python-docx
+pypdf2
