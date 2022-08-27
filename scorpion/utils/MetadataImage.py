@@ -4,6 +4,7 @@ from os.path import getsize
 
 class MetadataImage:
 
+    # Constructor of MetadataImage object
     def __init__(self, path):
         self.path = path
         self.filename = None
@@ -16,6 +17,7 @@ class MetadataImage:
         self.animate = None
         self.frames = None
 
+    # Function that prints the metadata of an image
     def getMetadata(self):
         print('\033[0;34m'+'***[TARGET IMAGE]***'+'\033[0m'+' -> {}\n'.format(self.path))
         self.filename = self.path.replace('/',' ').split()[-1]
@@ -36,6 +38,7 @@ class MetadataImage:
         except:
             print('\033[0;91m'+'    [ERROR]'+'\033[0m'+': Invalid File.')
 
+    # Function that prints the EXIF metadata of the resource
     def getEXIF(self):
         print('\033[0;92m'+'[EXIF METADATA]'+'\033[0m')
         img = open(self.path, 'rb')
@@ -47,6 +50,7 @@ class MetadataImage:
         else:
             print('\033[0;91m'+'    [ERROR]'+'\033[0m'+': Exif data not found!')
 
+    # Function that prints the basic metadata of the resource
     def printMetadata(self):
         print('\033[0;92m'+'[BASIC METADATA]'+'\033[0m')
         print('\033[0;93m'+'    [*] '+'\033[0m'+f"{'Image Path':30}-> {self.path}")
@@ -60,7 +64,7 @@ class MetadataImage:
         print('\033[0;93m'+'    [*] '+'\033[0m'+f"{'Image Animate':30}-> {self.animate}")
         print('\033[0;93m'+'    [*] '+'\033[0m'+f"{'Image Frames':30}-> {self.frames}")
 
-
+# Function that checks and filters the EXIF TAGS of the analyzed file
 def checkTagEXIF(tag):
     if tag not in ('JPEGThumbnail', 'TIFFThumbnail', 'Filename','EXIF MakerNote', 'EXIF ExifImageLength',
          'EXIF ExifImageWidth', 'Image PrintIM', 'Interoperability InteroperabilityVersion',
